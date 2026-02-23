@@ -1,0 +1,1 @@
+Shat is a terminal-based TCP chat application built in Go, featuring a concurrent hub-based architecture for managing multiple client connections efficiently
