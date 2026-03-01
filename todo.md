@@ -1,2 +1,3 @@
 [] ADD ROOM SUPPORT
 [] IMPORVE UI BY IMPLEMENTING BUBBLE TEA
+[]  ADD /quit , /online commands
