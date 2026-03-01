@@ -12,7 +12,8 @@ type Hub struct {
 	UnregisterChan chan *client.Client
 	Broadcast      chan string
 }
-func NewHub() *Hub{
+
+func NewHub() *Hub {
 
 	return &Hub{
 		Clients:        make(map[*client.Client]bool),
@@ -28,9 +29,10 @@ func (h *Hub) Run() {
 		select {
 		case c := <-h.RegisterChan:
 			h.Clients[c] = true
-			fmt.Println("client joined")
+			fmt.Printf("%v joined \n", c.Name)
 
 		case c := <-h.UnregisterChan:
+			fmt.Printf("%v Left", c.Name)
 			delete(h.Clients, c)
 			close(c.Send)
 

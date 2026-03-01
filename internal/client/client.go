@@ -22,22 +22,23 @@ func (c *Client) ReadLoop() {
 	for {
 		n, err := c.Conn.Read(b)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("err", err)
 			c.UnregisterChan <- c
 			c.Conn.Close()
 			return
 		}
 
 		msg := string(b[:n])
+		formaterdMessage := fmt.Sprintf("%s: %s", c.Name, msg)
 
-		c.Broadcast <- msg
+		c.Broadcast <- formaterdMessage
 	}
 }
 
 func (c *Client) WriteLoop() {
 	for msg := range c.Send {
-		_,err := c.Conn.Write([]byte(msg + "\n"))
-		if err !=nil {
+		_, err := c.Conn.Write([]byte(msg))
+		if err != nil {
 			fmt.Println(err)
 			return
 		}
