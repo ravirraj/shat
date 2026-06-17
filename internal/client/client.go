@@ -2,45 +2,54 @@ package client
 
 import (
 	"fmt"
-	"net"
-	// "github.com/ravirraj/shat/internal/hub"
-	// "github.com/ravirraj/shat/internal/hub"
+
+	"github.com/ravirraj/shat/internal/protocol"
+	"github.com/ravirraj/shat/internal/types"
 )
 
 type Client struct {
 	Name           string
-	Conn           net.Conn
-	Send           chan string
+	Conn           *protocol.FrameConn
+	Send           chan *types.Message
 	RegisterChan   chan<- *Client
 	UnregisterChan chan<- *Client
-	Broadcast      chan<- string
+	Broadcast      chan<- *types.RoomMessage
+	Room           string
 }
 
 func (c *Client) ReadLoop() {
-	b := make([]byte, 1024)
-
 	for {
-		n, err := c.Conn.Read(b)
+		msg, err := c.Conn.ReadMsg()
 		if err != nil {
-			fmt.Println("err", err)
+			fmt.Printf("read error from %s: %v\n", c.Name, err)
 			c.UnregisterChan <- c
 			c.Conn.Close()
 			return
 		}
 
-		msg := string(b[:n])
-		formaterdMessage := fmt.Sprintf("%s: %s", c.Name, msg)
+		msg.From = c.Name
+		msg.Room = c.Room
 
-		c.Broadcast <- formaterdMessage
+		c.Broadcast <- &types.RoomMessage{
+			Room:    msg.Room,
+			Message: msg,
+		}
 	}
 }
 
 func (c *Client) WriteLoop() {
 	for msg := range c.Send {
-		_, err := c.Conn.Write([]byte(msg))
-		if err != nil {
-			fmt.Println(err)
+		if err := c.Conn.WriteMsg(msg); err != nil {
+			fmt.Printf("write error to %s: %v\n", c.Name, err)
 			return
 		}
+	}
+}
+
+func (c *Client) SendMessage(msg *types.Message) {
+	select {
+	case c.Send <- msg:
+	default:
+		fmt.Printf("send buffer full for %s, dropping message\n", c.Name)
 	}
 }
