@@ -24,7 +24,7 @@ A terminal-based TCP chat application built in Go, featuring end-to-end encrypti
 
 ## Demo
 
-https://github.com/ravirraj/shat/blob/master/public/video/shat_demo.mp4
+![Demo](public/video/shat_demo.gif)
 
 ## Features
 
